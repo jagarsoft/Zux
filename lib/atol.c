@@ -5,7 +5,7 @@ register char *s;
 {
   register long total = 0;
   register unsigned digit;
-  register minus = 0;
+  register int minus = 0;
 
   while (isspace(*s))
 	s++;

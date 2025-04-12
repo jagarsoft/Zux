@@ -2,6 +2,8 @@
 
 char *nullptr[1];		/* the EXEC calls need a zero pointer */
 
+//PUBLIC int execve(char *name, char *argv[], char *envp[]);
+
 PUBLIC int execl(name, arg0)
 char *name;
 char *arg0;
@@ -15,7 +17,7 @@ char *name, *argv;
   char **p;
   p = (char **) &argv;
   while (*p++) /* null statement */ ;
-  return execve(name, &argv, *p);
+  return execve(name, &argv, p);
 }
 
 PUBLIC int execv(name, argv)
@@ -41,7 +43,7 @@ char *envp[];			/* pointer to environment */
   envorg = envp;
   while (*argorg++ != NIL_PTR) nargs++;
   while (*envorg++ != NIL_PTR) nenvps++;
-  ptrsize = sizeof(NIL_PTR);
+  ptrsize = sizeof(char *);
 
   /* Prepare to set up the initial stack. */
   hp = &stack[(nargs + nenvps + 3) * ptrsize];

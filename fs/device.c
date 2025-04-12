@@ -25,8 +25,13 @@
 #include "param.h"
 
 PRIVATE message dev_mess;
-PRIVATE major, minor, task;
-extern max_major;
+PRIVATE int major, minor, task;
+extern int max_major;
+
+PUBLIC void rw_dev(int task_nr, message *mess_ptr);
+PUBLIC void rw_dev2(int dummy, message *mess_ptr);
+
+PRIVATE void find_dev(dev_nr dev);
 
 /*===========================================================================*
  *				dev_open				     *
@@ -46,7 +51,7 @@ int mod;			/* how to open it */
 /*===========================================================================*
  *				dev_close				     *
  *===========================================================================*/
-PUBLIC dev_close(dev)
+PUBLIC void dev_close(dev)
 dev_nr dev;			/* which device to close */
 {
 /* This procedure can be used when a special file needs to be closed. */
@@ -126,7 +131,7 @@ PUBLIC do_ioctl()
 /*===========================================================================*
  *				find_dev				     *
  *===========================================================================*/
-PRIVATE find_dev(dev)
+PRIVATE void find_dev(dev)
 dev_nr dev;			/* device */
 {
 /* Extract the major and minor device number from the parameter. */
@@ -142,7 +147,7 @@ dev_nr dev;			/* device */
 /*===========================================================================*
  *				rw_dev					     *
  *===========================================================================*/
-PUBLIC rw_dev(task_nr, mess_ptr)
+PUBLIC void rw_dev(task_nr, mess_ptr)
 int task_nr;			/* which task to call */
 message *mess_ptr;		/* pointer to message for task */
 {
@@ -168,7 +173,7 @@ message *mess_ptr;		/* pointer to message for task */
 /*===========================================================================*
  *				rw_dev2					     *
  *===========================================================================*/
-PUBLIC rw_dev2(dummy, mess_ptr)
+PUBLIC void rw_dev2(dummy, mess_ptr)
 int dummy;			/* not used - for compatibility with rw_dev() */
 message *mess_ptr;		/* pointer to message for task */
 {

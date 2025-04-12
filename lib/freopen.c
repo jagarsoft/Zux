@@ -4,7 +4,7 @@ FILE *freopen(name,mode,stream)
 char *name,*mode;
 FILE *stream;
 {
-	FILE *fopen();
+	extern FILE *fopen();
 
 	if ( fclose(stream) != 0 )
 		return NULL;

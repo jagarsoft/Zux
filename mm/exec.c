@@ -22,6 +22,9 @@
 #include "mproc.h"
 #include "param.h"
 
+#include "utility.h"
+#include "../include/close.h"
+
 #define MAGIC    0x04000301L	/* magic number with 2 bits masked off */
 #define SEP      0x00200000L	/* value for separate I & D */
 #define TEXTB              2	/* location of text size in header */
@@ -281,7 +284,7 @@ int zs;				/* true size of 'bf' */
 /*===========================================================================*
  *				patch_ptr				     *
  *===========================================================================*/
-PRIVATE patch_ptr(stack, base)
+PRIVATE void patch_ptr(stack, base)
 char stack[MAX_ISTACK_BYTES];	/* pointer to stack image within MM */
 vir_bytes base;			/* virtual address of stack base inside user */
 {
@@ -314,7 +317,7 @@ vir_bytes base;			/* virtual address of stack base inside user */
 /*===========================================================================*
  *				load_seg				     *
  *===========================================================================*/
-PRIVATE load_seg(fd, seg, seg_bytes)
+PRIVATE void load_seg(fd, seg, seg_bytes)
 int fd;				/* file descriptor to read from */
 int seg;			/* T or D */
 vir_bytes seg_bytes;		/* how big is the segment */

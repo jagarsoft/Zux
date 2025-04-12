@@ -150,7 +150,7 @@ PRIVATE char tty_buf[TTY_BUF_SIZE];	/* scratch buffer to/from user space */
 PRIVATE int shift1, shift2, capslock, numlock;	/* keep track of shift keys */
 PRIVATE int control, alt;	/* keep track of key statii */
 PUBLIC  int color;		/* 1 if console is color, 0 if it is mono */
-PUBLIC scan_code;		/* scan code for '=' saved by bootstrap */
+PUBLIC  int scan_code;	/* scan code for '=' saved by bootstrap */
 
 /* Scan codes to ASCII for unshifted keys */
 PRIVATE char unsh[] = {
@@ -195,6 +195,19 @@ PRIVATE char m24[] = {
  0233,0234,0235,0236,0237,0275,0276,0277
 };
 
+EXTERN void lock(void);
+EXTERN void unlock(void);
+EXTERN void receive(int caller, struct message *m_ptr);
+
+PRIVATE int chuck(struct tty_struct *tp);
+PRIVATE int rd_chars(struct tty_struct *tp);
+
+PRIVATE void tty_init(void);
+PRIVATE void do_charint(message *m_ptr);
+PRIVATE void do_read(struct tty_struct *tp,  message *m_ptr);
+PRIVATE void do_write(struct tty_struct *tp, message *m_ptr);
+PRIVATE void do_ioctl(struct tty_struct *tp, message *m_ptr);
+PRIVATE void do_cancel(struct tty_struct *tp, message *m_ptr);
 
 /*===========================================================================*
  *				tty_task				     *
@@ -205,7 +218,7 @@ PUBLIC tty_task()
 
   message tty_mess;		/* buffer for all incoming messages */
   register struct tty_struct *tp;
-
+putsk("tty_task\n");
   tty_init();			/* initialize */
   while (TRUE) {
 	receive(ANY, &tty_mess);
@@ -227,7 +240,7 @@ PUBLIC tty_task()
 /*===========================================================================*
  *				do_charint				     *
  *===========================================================================*/
-PRIVATE do_charint(m_ptr)
+PRIVATE void do_charint(m_ptr)
 message *m_ptr;			/* message containing pointer to char(s) */
 {
 /* A character has been typed.  If a character is typed and the tty task is
@@ -444,6 +457,13 @@ char ch;			/* scan code of key just struck or released */
 }
 #endif
 
+#ifdef Z80
+PRIVATE char make_break(ch) // TODO ver que parte de TTY dep del dispositivo se usa
+char ch;
+{
+  return '\0';
+}
+#endif
 
 /*===========================================================================*
  *				echo					     *
@@ -486,7 +506,7 @@ register struct tty_struct *tp;	/* from which tty should chars be removed */
 /*===========================================================================*
  *				do_read					     *
  *===========================================================================*/
-PRIVATE do_read(tp, m_ptr)
+PRIVATE void do_read(tp, m_ptr)
 register struct tty_struct *tp;	/* pointer to tty struct */
 message *m_ptr;			/* pointer to message sent to the task */
 {
@@ -607,7 +627,7 @@ int code;			/* reply code */
 /*===========================================================================*
  *				do_write				     *
  *===========================================================================*/
-PRIVATE do_write(tp, m_ptr)
+PRIVATE void do_write(tp, m_ptr)
 register struct tty_struct *tp;	/* pointer to tty struct */
 message *m_ptr;			/* pointer to message sent to the task */
 {
@@ -643,7 +663,7 @@ message *m_ptr;			/* pointer to message sent to the task */
 /*===========================================================================*
  *				do_ioctl				     *
  *===========================================================================*/
-PRIVATE do_ioctl(tp, m_ptr)
+PRIVATE void do_ioctl(tp, m_ptr)
 register struct tty_struct *tp;	/* pointer to tty_struct */
 message *m_ptr;			/* pointer to message sent to task */
 {
@@ -703,7 +723,7 @@ message *m_ptr;			/* pointer to message sent to task */
 /*===========================================================================*
  *				do_cancel				     *
  *===========================================================================*/
-PRIVATE do_cancel(tp, m_ptr)
+PRIVATE void do_cancel(tp, m_ptr)
 register struct tty_struct *tp;	/* pointer to tty_struct */
 message *m_ptr;			/* pointer to message sent to task */
 {
@@ -919,7 +939,7 @@ register struct tty_struct *tp;	/* tells which terminal is to be used */
 /*===========================================================================*
  *				out_char				     *
  *===========================================================================*/
-PRIVATE out_char(tp, c)
+PRIVATE void out_char(tp, c)
 register struct tty_struct *tp;	/* pointer to tty struct */
 char c;				/* character to be output */
 {
@@ -1234,5 +1254,67 @@ char ch;			/* scan code for a function key */
 
   if (ch == F1) p_dmp();	/* print process table */
   if (ch == F2) map_dmp();	/* print memory map */
+}
+#endif
+
+#ifdef Z80
+/*===========================================================================*
+ *				keyboard				     *
+ *===========================================================================*/
+PUBLIC void keyboard()
+{
+	/* A keyboard interrupt has occurred.  Process it. */
+}
+
+/*===========================================================================*
+ *				tty_init				     *
+ *===========================================================================*/
+PRIVATE void tty_init(void)
+{
+	/* Initialize the tty tables. */
+
+	register struct tty_struct *tp;
+	int i;
+	phys_bytes phy1, phy2, vram;
+
+	for (tp = &tty_struct[0]; tp < &tty_struct[NR_TTYS]; tp++) {
+    }
+}
+
+/*===========================================================================*
+ *				out_char				     *
+ *===========================================================================*/
+PRIVATE out_char(tp, c)
+register struct tty_struct *tp;	/* pointer to tty struct */
+char c;				/* character to be output */
+{
+	/* Output a character on the console. Check for escape sequences, including
+	 *   ESC 32+x 32+y to move cursor to (x, y)
+	 *   ESC ~ 0       to clear from cursor to end of screen
+	 *   ESC ~ 1       to reverse scroll the screen 1 line
+	 *   ESC z x       to set the attribute byte to x (z is a literal here)
+	 */
+}
+
+/*===========================================================================*
+ *				flush					     *
+ *===========================================================================*/
+PRIVATE flush(tp)
+register struct tty_struct *tp;	/* pointer to tty struct */
+{
+}
+
+/*===========================================================================*
+ *				func_key				     *
+ *===========================================================================*/
+PRIVATE func_key(ch)
+char ch;			/* scan code for a function key */
+{
+	/* This procedure traps function keys for debugging purposes.  When MINIX is
+	 * fully debugged, it should be removed.
+	 */
+
+	if (ch == F1) p_dmp();	/* print process table */
+	if (ch == F2) map_dmp();	/* print memory map */
 }
 #endif

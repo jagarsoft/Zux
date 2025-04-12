@@ -31,6 +31,8 @@
 #define CORE_MODE	0777	/* mode to use on core image files */
 #define DUMPED          0200	/* bit set in status when core dumped */
 
+PRIVATE int check_sig(int proc_id, int sig_nr, uid send_uid);
+
 PRIVATE message m_sig;
 
 /*===========================================================================*

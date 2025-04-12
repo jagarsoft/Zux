@@ -31,9 +31,23 @@
 /* The 8259A interrupt controller has to be re-enabled after each interrupt. */
 #define INT_CTL         0x20	/* I/O port for interrupt controller */
 #define INT_CTLMASK     0x21	/* setting bits in this port disables ints */
-#define INT2_CTL	0xA0	/* I/O port for second interrupt controller */
-#define INT2_MASK	0xA1	/* setting bits in this port disables ints */
+#define INT2_CTL        0xA0	/* I/O port for second interrupt controller */
+#define INT2_MASK       0xA1	/* setting bits in this port disables ints */
 #define ENABLE          0x20	/* code used to re-enable after an interrupt */
+#endif
+
+
+#ifdef Z80
+/* p_reg contains: af, bc, de, hl, ix, iy in that order. */
+#define NR_REGS			6		/* number of general regs in each proc slot */
+
+#define HL_REGS			6		/* offset into proc[i].p_reg[hl] */
+#define DE_REGS			4		/* offset into proc[i].p_reg[de] */
+#define BC_REGS			2		/* offset into proc[i].p_reg[bc] */
+
+#define MEM_BYTES    655360L	/* memory size for /dev/mem */
+
+#define INIT_SP (int*)0x0       /* initial sp: 3 words pushed by kernel ??? */
 #endif
 
 #define TASK_STACK_BYTES 256	/* how many bytes for each task stack */
@@ -48,4 +62,10 @@
 #define SERVER_Q           1	/* ready servers are scheduled via queue 1 */
 #define USER_Q             2	/* ready users are scheduled via queue 2 */
 
+#ifdef i8088
 #define printf        printk	/* the kernel really uses printk, not printf */
+#endif
+
+#ifdef Z80
+#define printf    printk	/* the kernel really uses printk, not printf */
+#endif

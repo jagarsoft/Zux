@@ -19,6 +19,13 @@
 
 #define STACK_FAULT       16	/* used by kernel to signal stack fault */
 
-int	(*signal())();
-#define	SIG_DFL	(int (*)())0
-#define	SIG_IGN	(int (*)())1
+//int	(*signal())();
+//extern int (*signal)(int signr, int (*func)());
+//extern int (*signal(int signr,  )();
+
+// https://man7.org/linux/man-pages/man2/signal.2.html
+typedef int (*sighandler_t)();
+sighandler_t signal(int signum, sighandler_t handler);
+
+#define	SIG_DFL	(sighandler_t)0
+#define	SIG_IGN	(sighandler_t)1

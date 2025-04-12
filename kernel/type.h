@@ -18,3 +18,10 @@ struct sig_info {
   struct pc_psw sigpcpsw;
 };
 #endif
+
+#ifdef Z80
+struct pc_psw {
+  int (*pc)();			/* storage for program counter */
+  phys_clicks cs;		/* code segment register ??? */
+};
+#endif

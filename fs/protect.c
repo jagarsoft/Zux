@@ -32,6 +32,7 @@ PUBLIC int do_chmod()
   register struct inode *rip;
   register int r;
   extern struct inode *eat_path();
+  int read_only(struct inode *ip);
 
   /* Temporarily open the file. */
   if (fetch_name(name, name_length, M3) != OK) return(err_code);
@@ -70,6 +71,7 @@ PUBLIC int do_chown()
   register struct inode *rip;
   register int r;
   extern struct inode *eat_path();
+  int read_only(struct inode *ip);
 
   /* Only the super_user may perform the chown() call. */
   if (!super_user) return(EPERM);
@@ -143,6 +145,7 @@ int real_uid;			/* set iff real uid to be tested */
 
   register mask_bits bits, perm_bits, xmask;
   int r, shift, test_uid, test_gid;
+  int read_only(struct inode *ip);
 
   /* Isolate the relevant rwx bits from the mode. */
   bits = rip->i_mode;

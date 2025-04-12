@@ -1,4 +1,4 @@
-bcopy(old, new, n)
+void bcopy(old, new, n)
 register char *old, *new;
 int n;
 {

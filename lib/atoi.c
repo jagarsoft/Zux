@@ -11,7 +11,7 @@
 
 /* The others are problematic as the parameter may only be evaluated once */
 
-static _c_;		/* used to store the evaluated parameter */
+static char _c_;		/* used to store the evaluated parameter */
 
 #define isalpha(c)	(isupper(_c_ = (c)) || islower(_c_))
 #define isalnum(c)	(isalpha(c) || isdigit(_c_))
@@ -24,7 +24,7 @@ register char *s;
 {
   register int total = 0;
   register unsigned digit;
-  register minus = 0;
+  register int minus = 0;
 
   while (isspace(*s))
 	s++;

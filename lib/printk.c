@@ -4,10 +4,31 @@
  * has been defined as printk there.
  */
 
+#include "stdarg.h"
 
 #define MAXDIGITS         12
 
-printk(s, arglist)
+#ifdef Z80
+void putsk(unsigned char *s);
+void __FASTCALL__ putck(unsigned char c);
+#define putc putck
+#else
+extern void putc(char c);
+#endif
+
+void printk(const char *fmt,...);
+static void _printk(char *s, int *arglist);
+int bintoascii(long num, int radix, char a[MAXDIGITS]);
+
+void printk(const char *fmt,...)
+{
+  va_list ap;
+  va_start(ap,fmt);
+  _printk(fmt, ap);
+  va_end(ap);
+}
+
+static void _printk(s, arglist)
 char *s;
 int *arglist;
 {
@@ -16,13 +37,13 @@ int *arglist;
   long l, *lp;
   char a[MAXDIGITS], *p, *p1, c;
 
-  valp = (int *)  &arglist;
   while (*s != '\0') {
 	if (*s !=  '%') {
 		putc(*s++);
 		continue;
 	}
 
+	valp = (int *)  &arglist;
 	w = 0;
 	s++;
 	while (*s >= '0' && *s <= '9') {
@@ -57,7 +78,7 @@ int *arglist;
 
 
 
-static int bintoascii(num, radix, a)
+int bintoascii(num, radix, a)
 long num;
 int radix;
 char a[MAXDIGITS];
@@ -94,3 +115,26 @@ char a[MAXDIGITS];
   if (negative) a[n++] = '-';
   return(n);
 }
+
+#ifdef Z80
+void putsk(unsigned char *s) {
+	while (*s != '\0') {
+          putck(*s++);
+	}
+}
+
+void __FASTCALL__ putck(unsigned char c)
+{
+  // https://www.z88dk.org/forum/viewtopic.php?p=22863&sid=95e6655ce9bac030f0007ae5cbcafc4e#p22863
+
+  __asm
+      	ld	a, l
+		rst	0x10
+		cmp 0x0d
+		jr	nz, putsk_L0
+		ld	a, 0x0a
+		rst	0x10
+.putsk_L0:
+   __endasm;
+}
+#endif

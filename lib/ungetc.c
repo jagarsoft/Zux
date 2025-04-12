@@ -1,6 +1,6 @@
 #include "../include/stdio.h"
 
-ungetc(ch, iop)
+int ungetc(ch, iop)
 int ch;
 FILE *iop;
 {

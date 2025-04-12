@@ -37,7 +37,7 @@ PUBLIC main()
  */
   int error;
   extern int (*call_vector[NCALLS])();
-
+putsk("fs\n");
   fs_init();
 
   /* This is the main loop that gets work, processes it, and sends replies. */
@@ -224,7 +224,7 @@ PRIVATE load_ram()
   block_nr i;
   phys_clicks ram_clicks, init_org, init_text_clicks, init_data_clicks;
   extern phys_clicks data_org[INFO + 2];
-  extern struct buf *get_block();
+
 
   /* Get size of INIT by reading block on diskette where 'build' put it. */
   init_org = data_org[INFO];

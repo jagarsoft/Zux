@@ -37,6 +37,9 @@ PRIVATE message mess;		/* message buffer */
 PRIVATE phys_bytes ram_origin[NR_RAMS];	/* origin of each RAM disk  */
 PRIVATE phys_bytes ram_limit[NR_RAMS];	/* limit of RAM disk per minor dev. */
 
+PRIVATE int do_mem(message *m_ptr);
+PRIVATE int do_setup(message *m_ptr);
+
 /*===========================================================================*
  *				mem_task				     * 
  *===========================================================================*/
@@ -48,7 +51,7 @@ PUBLIC mem_task()
   extern unsigned sizes[8];
   extern phys_clicks get_base();
 
-
+putsk("mem_task\n");
   /* Initialize this task. */
   ram_origin[KMEM_DEV] = (phys_bytes) get_base() << CLICK_SHIFT;
   ram_limit[KMEM_DEV] = (sizes[0] + sizes[1]) << CLICK_SHIFT;

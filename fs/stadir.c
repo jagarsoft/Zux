@@ -20,6 +20,9 @@
 #include "inode.h"
 #include "param.h"
 
+PRIVATE int change(struct inode **iip, char *name_ptr, int len);
+PRIVATE int stat_inode(register struct inode *rip, struct filp *fil_ptr, char *user_addr);
+
 /*===========================================================================*
  *				do_chdir				     *
  *===========================================================================*/

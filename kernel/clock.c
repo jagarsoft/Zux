@@ -54,6 +54,11 @@ PRIVATE struct proc *prev_ptr;	/* last user process run by clock task */
 PRIVATE message mc;		/* message buffer for both input and output */
 PRIVATE int (*watch_dog[NR_TASKS+1])();	/* watch_dog functions to call */
 
+PRIVATE void do_setalarm(message *m_ptr);
+PRIVATE void do_get_time(void);
+PRIVATE void do_set_time(message *m_ptr);
+PRIVATE void do_clocktick(void);
+
 /*===========================================================================*
  *				clock_task				     *
  *===========================================================================*/
@@ -62,9 +67,9 @@ PUBLIC clock_task()
 /* Main program of clock task.  It determines which of the 4 possible
  * calls this is by looking at 'mc.m_type'.   Then it dispatches.
  */
- 
-  int opcode;
 
+  int opcode;
+putsk("clock_task\n");
   init_clock();			/* initialize clock tables */
 
   /* Main loop of the clock task.  Get work, process it, sometimes reply. */
@@ -90,7 +95,7 @@ PUBLIC clock_task()
 /*===========================================================================*
  *				do_setalarm				     *
  *===========================================================================*/
-PRIVATE do_setalarm(m_ptr)
+PRIVATE void do_setalarm(m_ptr)
 message *m_ptr;			/* pointer to request message */
 {
 /* A process wants an alarm signal or a task wants a given watch_dog function
@@ -123,7 +128,7 @@ message *m_ptr;			/* pointer to request message */
 /*===========================================================================*
  *				do_get_time				     *
  *===========================================================================*/
-PRIVATE do_get_time()
+PRIVATE void do_get_time()
 {
 /* Get and return the current clock time in ticks. */
 
@@ -135,7 +140,7 @@ PRIVATE do_get_time()
 /*===========================================================================*
  *				do_set_time				     *
  *===========================================================================*/
-PRIVATE do_set_time(m_ptr)
+PRIVATE void do_set_time(m_ptr)
 message *m_ptr;			/* pointer to request message */
 {
 /* Set the real time clock.  Only the superuser can use this call. */
@@ -147,13 +152,13 @@ message *m_ptr;			/* pointer to request message */
 /*===========================================================================*
  *				do_clocktick				     *
  *===========================================================================*/
-PRIVATE do_clocktick()
+PRIVATE void do_clocktick()
 {
 /* This routine called on every clock tick. */
 
   register struct proc *rp;
   register int t, proc_nr;
-  extern int pr_busy, pcount, cum_count, prev_ct;
+  // extern int pr_busy, pcount, cum_count, prev_ct;
 
   /* To guard against race conditions, first copy 'lost_ticks' to a local
    * variable, add this to 'realtime', and then subtract it from 'lost_ticks'.
@@ -197,8 +202,8 @@ PRIVATE do_clocktick()
 	prev_ptr = bill_ptr;			/* new previous process */
 
 	/* Check if printer is hung up, and if so, restart it. */
-	if (pr_busy && pcount > 0 && cum_count == prev_ct) pr_char(); 
-	prev_ct = cum_count;	/* record # characters printed so far */
+	// if (pr_busy && pcount > 0 && cum_count == prev_ct) pr_char(); TODO
+	//prev_ct = cum_count;	/* record # characters printed so far */
   }
 
 }
@@ -237,5 +242,15 @@ PRIVATE init_clock()
   port_out(TIMER_MODE, SQUARE_WAVE);	/* set timer to run continuously */
   port_out(TIMER0, low_byte);		/* load timer low byte */
   port_out(TIMER0, high_byte);		/* load timer high byte */
+}
+#endif
+
+#ifdef Z80
+/*===========================================================================*
+ *				init_clock				     *
+ *===========================================================================*/
+PRIVATE init_clock()
+{
+	/* Initialize channel 2 of the 8253A timer to e.g. 60 Hz. */
 }
 #endif

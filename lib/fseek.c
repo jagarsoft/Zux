@@ -6,7 +6,7 @@ FILE *iop;
 long offset;
 {
 	int  count;
-	long lseek();
+	extern long lseek();
 	long pos;
 
 	iop->_flags &= ~(_EOF | _ERR);

@@ -8,7 +8,7 @@ char *name , *mode;
 {
 	register int i;
 	FILE *fp;
-	char *malloc();
+	extern char *malloc();
 	int fd,
 	flags = 0;
 

@@ -148,7 +148,7 @@ register struct inode *rip;	/* pointer to inode to be truncated */
   register int scale;
   register struct buf *bp;
   register dev_nr dev;
-  extern struct buf *get_block();
+
   extern block_nr read_map();
 
   dev = rip->i_dev;		/* device on which inode resides */

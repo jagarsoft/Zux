@@ -15,7 +15,7 @@ prints(s, arglist)
 register char *s;
 int *arglist;
 {
-  register w;
+  register int w;
   int k, r, *valp;
   char *p, *p1, c;
 

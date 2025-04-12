@@ -39,7 +39,7 @@ endgrent ()
 }
 
 
-static getline () 
+static getlineG () 
 {
         if (_gfd < 0 && setgrent () < 0)
 	        return (0);
@@ -61,7 +61,7 @@ static getline ()
         return (1);
 }
 
-static skip_period () 
+static void skip_periodG () 
 {
         while (*_buf != ':')
 	        _buf++;
@@ -70,15 +70,15 @@ static skip_period ()
 
 struct group   *getgrent () 
 {
-        if (getline () == 0)
+        if (getlineG () == 0)
                return (0);
 
         grp.name = _buf;
-        skip_period ();
+        skip_periodG ();
         grp.passwd = _buf;
-        skip_period ();
+        skip_periodG ();
         grp.gid = atoi (_buf);
-        skip_period ();
+        skip_periodG ();
         return (&grp);
 }
 

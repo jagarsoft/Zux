@@ -23,8 +23,13 @@
 #include "inode.h"
 #include "super.h"
 
+PUBLIC struct super_block *get_super(dev_nr dev);
+EXTERN struct buf *get_block(register dev_nr dev, register block_nr block, int only_search);
+
 #define INT_BITS (sizeof(int)<<3)
 #define BIT_MAP_SHIFT     13	/* (log2 of BLOCK_SIZE) + 3; 13 for 1k blocks */
+
+PUBLIC void free_bit(struct buf *map_ptr[], bit_nr bit_returned);
 
 /*===========================================================================*
  *				load_bit_maps				     *
@@ -37,8 +42,6 @@ dev_nr dev;			/* which device? */
   register int i;
   register struct super_block *sp;
   block_nr zbase;
-  extern struct buf *get_block();
-  extern struct super_block *get_super();
 
   sp = get_super(dev);		/* get the superblock pointer */
   if (bufs_in_use + sp->s_imap_blocks + sp->s_zmap_blocks >= NR_BUFS - 3)
@@ -74,7 +77,6 @@ dev_nr dev;			/* which device is being unmounted? */
 
   register int i;
   register struct super_block *sp;
-  struct super_block *get_super();
 
   sp = get_super(dev);		/* get the superblock pointer */
   bufs_in_use -= sp->s_imap_blocks + sp->s_zmap_blocks;
@@ -146,7 +148,7 @@ bit_nr origin;			/* number of bit to start searching at */
 /*===========================================================================*
  *				free_bit				     *
  *===========================================================================*/
-PUBLIC free_bit(map_ptr, bit_returned)
+PUBLIC void free_bit(map_ptr, bit_returned)
 struct buf *map_ptr[];		/* pointer to array of bit block pointers */
 bit_nr bit_returned;		/* number of bit to insert into the map */
 {
@@ -171,8 +173,8 @@ bit_nr bit_returned;		/* number of bit to insert into the map */
 /*===========================================================================*
  *				get_super				     *
  *===========================================================================*/
-PUBLIC struct super_block *get_super(dev)
-dev_nr dev;			/* device number whose super_block is sought */
+PUBLIC struct super_block *get_super(dev_nr dev)
+//dev_nr dev;			/* device number whose super_block is sought */
 {
 /* Search the superblock table for this device.  It is supposed to be there. */
 
@@ -233,7 +235,6 @@ int rw_flag;			 /* READING or WRITING */
 
   register struct buf *bp;
   dev_nr dev;
-  extern struct buf *get_block();
 
   /* Check if this is a read or write, and do it. */
   if (rw_flag == READING) {

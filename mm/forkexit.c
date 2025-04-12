@@ -24,7 +24,7 @@
 
 #define LAST_FEW            2	/* last few slots reserved for superuser */
 
-PRIVATE next_pid = INIT_PROC_NR+1;	/* next pid to be assigned */
+PRIVATE int next_pid = INIT_PROC_NR+1;	/* next pid to be assigned */
 
 /* Some C compilers require static declarations to precede their first use. */
 

@@ -200,7 +200,7 @@ int rw_flag;			/* READING or WRITING */
   register d_inode *dip;
   register struct super_block *sp;
   block_nr b;
-  extern struct buf *get_block();
+
   extern struct super_block *get_super();
 
   /* Get the block where the inode resides. */

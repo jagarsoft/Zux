@@ -54,7 +54,7 @@ char *s;
   }
 }
 
-static int slen(s)
+int slen(s)
 char *s;
 {
   int k = 0;

@@ -22,11 +22,19 @@
 
 #define SAFETY             8	/* margin of safety for stack overflow (ints)*/
 #define VERY_BIG       39328	/* must be bigger than kernel size (clicks) */
+
+#ifdef i8088
 #define BASE            1536	/* address where MINIX starts in memory */
-#define SIZES              8	/* sizes array has 8 entries */
 #define CPU_TY1       0xFFFF	/* BIOS segment that tells CPU type */
 #define CPU_TY2       0x000E	/* BIOS offset that tells CPU type */
 #define PC_AT           0xFC	/* IBM code for PC-AT (in BIOS at 0xFFFFE) */
+#endif
+
+#ifdef Z80
+#define BASE               0	/* address where MINIX starts in memory */
+#endif
+
+#define SIZES              8	/* sizes array has 8 entries */
 
 /*===========================================================================*
  *                                   main                                    * 
@@ -45,6 +53,7 @@ PUBLIC main()
   extern int s_call(), disk_int(), tty_int(), clock_int(), disk_int();
   extern int wini_int(), lpr_int(), surprise(), trp(), divide();
   extern phys_bytes umap();
+  extern void lock();
 
   /* Set up proc table entry for user processes.  Be very careful about
    * sp, since the 3 words prior to it will be clobbered when the kernel pushes
@@ -54,12 +63,13 @@ PUBLIC main()
    */
 
   lock();			/* we can't handle interrupts yet */
+	putsk("Kernel\n");
   base_click = BASE >> CLICK_SHIFT;
   size = sizes[0] + sizes[1];	/* kernel text + data size in clicks */
   mm_base = base_click + size;	/* place where MM starts (in clicks) */
 
   for (rp = &proc[0]; rp <= &proc[NR_TASKS+LOW_USER]; rp++) {
-	for (t=0; t< NR_REGS; t++) rp->p_reg[t] = 0100*t;	/* debugging */
+	for (t=0; t<NR_REGS; t++) rp->p_reg[t] = 0100*t;	/* debugging */
 	t = rp - proc - NR_TASKS;	/* task number */
 	rp->p_sp = (rp < &proc[NR_TASKS] ? t_stack[NR_TASKS+t+1].stk : INIT_SP);
 	rp->p_splimit = rp->p_sp;
@@ -67,7 +77,9 @@ PUBLIC main()
 		rp->p_splimit -= (TASK_STACK_BYTES - SAFETY)/sizeof(int);
 	rp->p_pcpsw.pc = task[t + NR_TASKS];
 	if (rp->p_pcpsw.pc != 0 || t >= 0) ready(rp);
+#ifdef i8088
 	rp->p_pcpsw.psw = INIT_PSW;
+#endif
 	rp->p_flags = 0;
 
 	/* Set up memory map for tasks and MM, FS, INIT. */
@@ -109,6 +121,8 @@ PUBLIC main()
 
   /* Determine if display is color or monochrome and CPU type (from BIOS). */
   color = get_chrome();		/* 0 = mono, 1 = color */
+
+#ifdef i8088
   t = get_byte(CPU_TY1, CPU_TY2);	/* is this PC, XT, AT ... ? */
   if (t == PC_AT) pc_at = TRUE;
 
@@ -132,13 +146,21 @@ PUBLIC main()
 
   /* Put a ptr to proc table in a known place so it can be found in /dev/mem */
   set_vec( (BASE - 4)/4, proc, (phys_clicks) 0);
+#endif
+
+#ifdef Z80
+  /* Put a ptr to proc table in a known place so it can be found in /dev/mem */
+  /* get_proc_table_from_dev_men /* TODO */
+#endif
 
   bill_ptr = proc_addr(HARDWARE);	/* it has to point somewhere */
   pick_proc();
 
+#ifdef i8088
   /* Now go to the assembly code to start running the current process. */
   port_out(INT_CTLMASK, 0);	/* do not mask out any interrupts in 8259A */
   port_out(INT2_MASK, 0);	/* same for second interrupt controller */
+#endif
   restart();
 }
 
@@ -187,7 +209,7 @@ PUBLIC div_trap()
 /*===========================================================================*
  *                                   panic                                   * 
  *===========================================================================*/
-PUBLIC panic(s,n)
+PUBLIC void panic(s,n)
 char *s;
 int n; 
 {
@@ -203,7 +225,7 @@ int n;
 	printf("\n");
   }
   printf("\nType space to reboot\n");
-  wreboot();
+  /* wreboot();	TODO */
 
 }
 

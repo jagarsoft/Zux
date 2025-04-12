@@ -5,7 +5,7 @@ long ftell(iop)
 FILE *iop;
 {
 	long result;
-	long lseek();
+	extern long lseek();
 	int adjust = 0;
 
 	if ( testflag(iop,READMODE) )

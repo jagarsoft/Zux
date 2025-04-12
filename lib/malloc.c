@@ -1,13 +1,14 @@
 
 #define CLICK_SIZE	16
 typedef unsigned short vir_bytes;
-extern bcopy();
+extern void bcopy(char *old, char *new, int n);
 
 #define ALIGN(x, a)	(((x) + (a - 1)) & ~(a - 1))
 #define BUSY		1
 #define NEXT(p)		(* (char **) (p))
 
 extern char *sbrk();
+extern char *brk();
 static char *bottom, *top;
 
 static grow(len)

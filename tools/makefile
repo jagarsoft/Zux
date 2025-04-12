@@ -1,5 +1,10 @@
-l=../lib
-CFLAGS = -O -DPCIX
+CC=zcc
+AS=zcc
+TARGET=+Zux
+#l=../lib
+#CFLAGS = -O -DPCIX
+VERBOSITY=-v
+CFLAGS=$(TARGET) $(VERBOSITY) $(DEFINES) $(Z88DKFLAGS) $(INCFLAGS) $(LIBFLAGS) -startup=4
 
 all:
 	make init
@@ -8,9 +13,12 @@ all:
 	make mkfs
 	make fsck
 
-init:	$l/libc.a init.o $l/head.o
-	ld -o init  $l/head.o init.o $l/libc.a  $l/end.o
-	@echo init done.
+#init:	$l/libc.a init.o $l/head.o
+#	ld -o init  $l/head.o init.o $l/libc.a  $l/end.o
+init:	init.o
+	@echo Init org `cat ../fs/ker_mm_fs_len.txt`
+	$(CC) $(CFLAGS) -o init.bin init.c
+	z88dk-dis -o `cat ../fs/ker_mm_fs_len.txt` -x init.map init.bin > init.bin.asm
 
 # bootblok.s is the source of the MINIX boot block.  The bootblock is the
 # first 512 bytes on the image file and on the boot diskette.  When bootblok.s
@@ -34,6 +42,11 @@ bootblok:	bootblok.s
 build:	build.o
 	cc -o build build.o
 	@echo build done.
+
+# build-Zux.exe must be compiled with your native compiler, NOT z88dk!!
+#build-Zux.exe:	build-Zux.o
+#	$(CC) $(CFLAGS) -o built-Zux.exe build.o
+#	@echo build-Zux.exe done.
 
 mkfs:	mkfs.o
 	cc -o mkfs mkfs.o

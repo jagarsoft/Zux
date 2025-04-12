@@ -22,7 +22,7 @@ main()
 {
   char line[10];		/* /etc/ttys lines are supposed to be 3 chars */
   int rc, tty, k, status, ttynr, ct, i;
-
+putsk("init\n");
   /* Carry out /etc/rc. */
   sync();			/* force buffers out onto RAM disk */
   if (fork()) {

@@ -33,7 +33,7 @@ int mask;			/* R_BIT, W_BIT, or X_BIT */
 
   register int fd, shift;
   int mode;
-  extern errno;
+  extern int errno;
 
   /* Open the file and stat it. */
   if ( (fd = open(name_buf, 0)) < 0) return(-errno);

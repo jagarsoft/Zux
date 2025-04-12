@@ -1,0 +1,11 @@
+POC/
+**/*.o
+**/*.map
+**/*.sym
+**/*.lis
+**/*.lst
+**/*.bin
+**/*.lib
+
+cmake-build-debug/
+CMakeLists.txt

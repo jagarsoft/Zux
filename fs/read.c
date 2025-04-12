@@ -30,6 +30,8 @@
 PRIVATE message umess;		/* message for asking SYSTASK for user copy */
 PUBLIC int rdwt_err;		/* set to EIO if disk error occurs */
 
+PRIVATE int rw_chunk(register struct inode *rip, file_pos position, unsigned off, int chunk, int rw_flag, char *buff, int seg, int usr);
+
 /*===========================================================================*
  *				do_read					     *
  *===========================================================================*/
@@ -190,7 +192,7 @@ int usr;			/* which user process */
   int dir, n, block_spec;
   block_nr b;
   dev_nr dev;
-  extern struct buf *get_block(), *new_block();
+  extern struct buf *new_block();
   extern block_nr read_map();
 
   block_spec = (rip->i_mode & I_TYPE) == I_BLOCK_SPECIAL;
@@ -251,7 +253,6 @@ file_pos position;		/* position in file whose blk wanted */
   register block_nr b;
   register long excess, zone, block_pos;
   register int scale, boff;
-  extern struct buf *get_block();
 
   scale = scale_factor(rip);	/* for block-zone conversion */
   block_pos = position/BLOCK_SIZE;	/* relative blk # in file */
@@ -343,7 +344,6 @@ PUBLIC read_ahead()
   register struct inode *rip;
   struct buf *bp;
   block_nr b;
-  extern struct buf *get_block();
 
   rip = rdahed_inode;		/* pointer to inode to read ahead from */
   rdahed_inode = NIL_INODE;	/* turn off read ahead */

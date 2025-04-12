@@ -10,6 +10,7 @@
 
 #define PRIVATE static
 
+extern long lseek();
 
 PRIVATE char  _pw_file[] = "/etc/passwd";
 PRIVATE char  _pwbuf[256];
@@ -20,7 +21,7 @@ PRIVATE int   _pw = -1;
 PRIVATE int   _bufcnt;
 PRIVATE struct passwd    pwd;
 
-setpwent() 
+int setpwent() 
 {
 	if (_pw >= 0)
 		lseek (_pw, 0L, 0);
@@ -41,7 +42,7 @@ endpwent ()
 	_bufcnt = 0;
 }
 
-static getline () 
+static getlineP () 
 {
 	if (_pw < 0 && setpwent () < 0)
 		return (0);
@@ -62,7 +63,7 @@ static getline ()
 	return (1);
 }
 
-static skip_period () 
+static void skip_periodP ()
 {
 	while (*_buf != ':')
 		_buf++;
@@ -72,22 +73,22 @@ static skip_period ()
 
 struct passwd  *getpwent () 
 {
-	if (getline () == 0)
+	if (getlineP () == 0)
 		return (0);
 
-	pwd.name = _buf;
-	skip_period ();
-	pwd.passwd = _buf;
-	skip_period ();
-	pwd.uid = atoi (_buf);
-	skip_period ();
-	pwd.gid = atoi (_buf);
-	skip_period ();
-	pwd.gecos = _buf;
-	skip_period ();
-	pwd.dir = _buf;
-	skip_period ();
-	pwd.shell = _buf;
+	pwd.pw_name = _buf;
+	skip_periodP ();
+	pwd.pw_passwd = _buf;
+	skip_periodP ();
+	pwd.pw_uid = atoi (_buf);
+	skip_periodP ();
+	pwd.pw_gid = atoi (_buf);
+	skip_periodP ();
+	pwd.pw_gecos = _buf;
+	skip_periodP ();
+	pwd.pw_dir = _buf;
+	skip_periodP ();
+	pwd.pw_shell = _buf;
 
 	return (&pwd);
 }
@@ -99,7 +100,7 @@ char   *name;
 
 	setpwent ();
 	while ((pwd = getpwent ()) != 0)
-		if (!strcmp (pwd -> name, name))
+		if (!strcmp (pwd -> pw_name, name))
 			break;
 	endpwent ();
 	if (pwd != 0)
@@ -115,7 +116,7 @@ int     uid;
 
 	setpwent ();
 	while ((pwd = getpwent ()) != 0)
-		if (pwd -> uid == uid)
+		if (pwd -> pw_uid == uid)
 			break;
 	endpwent ();
 	if (pwd != 0)

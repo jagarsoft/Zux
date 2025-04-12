@@ -69,6 +69,16 @@
 
 extern phys_bytes umap();
 
+PRIVATE int do_fork(message *m_ptr);
+PRIVATE int do_newmap(message *m_ptr);
+PRIVATE int do_exec(message *m_ptr);
+PRIVATE int do_xit(message *m_ptr);
+PRIVATE int do_getsp(message *m_ptr);
+PRIVATE int do_times(message *m_ptr);
+PRIVATE int do_abort(message *m_ptr);
+PRIVATE int do_sig(message *m_ptr);
+PRIVATE int do_copy(message *m_ptr);
+
 PRIVATE message m;
 PRIVATE char sig_stuff[SIG_PUSH_BYTES];	/* used to send signals to processes */
 
@@ -80,7 +90,7 @@ PUBLIC sys_task()
 /* Main entry point of sys_task.  Get the message and dispatch on type. */
 
   register int r;
-
+putsk("sys_task\n");
   while (TRUE) {
 	receive(ANY, &m);
 

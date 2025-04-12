@@ -22,12 +22,12 @@
 #include "inode.h"
 #include "super.h"
 
-extern do_access(), do_chdir(), do_chmod(), do_chown(), do_chroot();
-extern do_close(), do_creat(), do_dup(), do_exit(), do_fork(), do_fstat();
-extern do_ioctl(), do_link(), do_lseek(), do_mknod(), do_mount(), do_open();
-extern do_pipe(), do_read(), do_revive(), do_set(), do_stat(), do_stime();
-extern do_sync(), do_time(), do_tims(), do_umask(), do_umount(), do_unlink();
-extern do_unpause(), do_utime(), do_write(), no_call(), no_sys();
+extern int do_access(), do_chdir(), do_chmod(), do_chown(), do_chroot();
+extern int do_close(), do_creat(), do_dup(), do_exit(), do_fork(), do_fstat();
+extern int do_ioctl(), do_link(), do_lseek(), do_mknod(), do_mount(), do_open();
+extern int do_pipe(), do_read(), do_revive(), do_set(), do_stat(), do_stime();
+extern int do_sync(), do_time(), do_tims(), do_umask(), do_umount(), do_unlink();
+extern int do_unpause(), do_utime(), do_write(), no_call(), no_sys();
 
 extern char fstack[];
 char *stackpt = &fstack[FS_STACK_BYTES];	/* initial stack pointer */
@@ -106,7 +106,8 @@ int (*call_vector[NCALLS])() = {
 };
 
 
-extern rw_dev(), rw_dev2();
+EXTERN void rw_dev(int task_nr, message *mess_ptr);
+EXTERN void rw_dev2(int dummy, message *mess_ptr);
 
 /* The order of the entries here determines the mapping between major device
  * numbers and tasks.  The first entry (major device 0) is not used.  The
@@ -117,13 +118,13 @@ extern rw_dev(), rw_dev2();
 struct dmap dmap[] = {
 /*  Open       Read/Write   Close       Task #      Device  File
     ----       ----------   -----       -------     ------  ----      */
-    0,         0,           0,          0,           /* 0 = not used  */
-    no_call,   rw_dev,      no_call,    MEM,         /* 1 = /dev/mem  */
-    no_call,   rw_dev,      no_call,    FLOPPY,      /* 2 = /dev/fd0  */
-    no_call,   rw_dev,      no_call,    WINCHESTER,  /* 3 = /dev/hd0  */
-    no_call,   rw_dev,      no_call,    TTY,         /* 4 = /dev/tty0 */
-    no_call,   rw_dev2,     no_call,    TTY,         /* 5 = /dev/tty  */
-    no_call,   rw_dev,      no_call,    PRINTER      /* 6 = /dev/lp   */
+    {0,         0,           0,          0},           /* 0 = not used  */
+    {no_call,   rw_dev,      no_call,    MEM},         /* 1 = /dev/mem  */
+    {no_call,   rw_dev,      no_call,    FLOPPY},      /* 2 = /dev/fd0  */
+    {no_call,   rw_dev,      no_call,    WINCHESTER},  /* 3 = /dev/hd0  */
+    {no_call,   rw_dev,      no_call,    TTY},         /* 4 = /dev/tty0 */
+    {no_call,   rw_dev2,     no_call,    TTY},         /* 5 = /dev/tty  */
+    {no_call,   rw_dev,      no_call,    PRINTER}      /* 6 = /dev/lp   */
 };
 
 int max_major = sizeof(dmap)/sizeof(struct dmap);

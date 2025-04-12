@@ -27,7 +27,7 @@
 #define CLICK_TO_K (1024L/CLICK_SIZE)	/* convert clicks to K */
 
 PRIVATE phys_clicks tot_mem;
-extern (*call_vec[])();
+extern int (*call_vec[])();
 
 /*===========================================================================*
  *				main					     *
@@ -37,7 +37,7 @@ PUBLIC main()
 /* Main routine of the memory manager. */
 
   int error;
-
+putsk("mm\n");
   mm_init();			/* initialize memory manager tables */
 
   /* This is MM's main loop-  get work and do it, forever and forever. */

@@ -21,9 +21,20 @@ unshort core_bits = 0x0EFC;	/* which signals cause core images */
 extern char mm_stack[];
 char *stackpt = &mm_stack[MM_STACK_BYTES];	/* initial stack pointer */
 
-extern do_mm_exit(), do_fork(), do_wait(), do_brk(), do_getset(), do_exec();
-extern do_signal(), do_kill(), do_pause(), do_alarm();
-extern no_sys(), unpause(), do_ksig(), do_brk2();
+extern int do_mm_exit();
+extern int do_fork();
+extern int do_wait();
+extern int do_brk();
+extern int do_getset();
+extern int do_exec();
+extern int do_signal();
+extern int do_kill();
+extern int do_pause();
+extern int do_alarm();
+extern int no_sys();
+extern int unpause();
+extern int do_ksig();
+extern int do_brk2();
 
 int (*call_vec[NCALLS])() = {
 	no_sys,		/*  0 = unused	*/

@@ -48,7 +48,6 @@ zone_nr new_zone;		/* zone # to be inserted */
   int new_ind, new_dbl;
 
   extern zone_nr alloc_zone();
-  extern struct buf *get_block();
   extern real_time clock_time();
 
   rip->i_dirt = DIRTY;		/* inode will be changed */
@@ -135,7 +134,6 @@ int flag;			/* 0 if called by read_write, 1 by new_block */
   register file_pos next;
   register int scale;
   register zone_type zone_size;
-  extern struct buf *get_block();
   extern block_nr read_map();
 
   /* If the block size and zone size are the same, clear_zone() not needed. */
@@ -178,7 +176,6 @@ file_pos position;		/* file pointer */
   zone_type zone_size;
   int scale, r;
   struct super_block *sp;
-  extern struct buf *get_block();
   extern struct super_block *get_super();
   extern block_nr read_map();
   extern zone_nr alloc_zone();

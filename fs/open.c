@@ -36,7 +36,7 @@ PUBLIC int do_creat()
   register mask_bits bits;
   struct filp *fil_ptr;
   int file_d;
-  extern struct inode *new_node();
+  struct inode *new_node(char *path, mask_bits bits, zone_nr z0);
 
   /* See if name ok and file descriptor and filp slots are available. */
   if (fetch_name(name, name_length, M3) != OK) return(err_code);
@@ -94,6 +94,7 @@ PUBLIC int do_mknod()
 /* Perform the mknod(name, mode, addr) system call. */
 
   register mask_bits bits;
+  struct inode *new_node(char *path, mask_bits bits, zone_nr z0);
 
   if (!super_user) return(EPERM);	/* only super_user may make nodes */
   if (fetch_name(name1, name1_length, M1) != OK) return(err_code);

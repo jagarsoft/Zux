@@ -67,7 +67,7 @@ char string[NAME_SIZE];		/* the final component is returned here */
   register char *new_name;
   register struct inode *new_ip;
   extern struct inode *advance();
-  extern char *get_name();
+  char *get_name(char *old_name, char string[NAME_SIZE]);
 
   /* Is the path absolute or relative?  Initialize 'rip' accordingly. */
   rip = (*path == '/' ? fp->fp_rootdir : fp->fp_workdir);
@@ -231,7 +231,7 @@ int flag;			/* LOOK_UP, ENTER, or DELETE */
   unsigned new_slots, old_slots;
   block_nr b;
   int e_hit;
-  extern struct buf *get_block(), *new_block();
+  extern struct buf *new_block();
   extern block_nr read_map();
   extern real_time clock_time();
 

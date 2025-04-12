@@ -23,6 +23,9 @@
 #include "param.h"
 #include "super.h"
 
+PUBLIC void copy(char *dest, char *source, int bytes);
+PUBLIC void panic(char *format, int num);
+
 PRIVATE int panicking;		/* inhibits recursive panics during sync */
 PRIVATE message clock_mess;
 
@@ -73,7 +76,7 @@ register int n;			/* string length */
 /*===========================================================================*
  *				copy					     *
  *===========================================================================*/
-PUBLIC copy(dest, source, bytes)
+PUBLIC void copy(dest, source, bytes)
 char *dest;			/* destination pointer */
 char *source;			/* source pointer */
 int bytes;			/* how much data to move */
@@ -156,7 +159,7 @@ PUBLIC int no_sys()
 /*===========================================================================*
  *				panic					     *
  *===========================================================================*/
-PUBLIC panic(format, num)
+PUBLIC void panic(format, num)
 char *format;			/* format string */
 int num;			/* number to go with format string */
 {

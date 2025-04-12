@@ -24,13 +24,17 @@
 #include "inode.h"
 #include "super.h"
 
+PUBLIC void rw_block(register struct buf *bp, int rw_flag);
+EXTERN void free_bit(struct buf *map_ptr[], bit_nr bit_returned);
+EXTERN int dev_io(int rw_flag, dev_nr dev, long pos, int bytes, int proc, char *buff);
+EXTERN bit_nr alloc_bit(struct buf *map_ptr[], bit_nr map_bits, unshort bit_blocks, bit_nr origin);
+EXTERN struct super_block *get_super(dev_nr dev);
+EXTERN void panic(char *s, int num);
+
 /*===========================================================================*
  *				get_block				     *
  *===========================================================================*/
-PUBLIC struct buf *get_block(dev, block, only_search)
-register dev_nr dev;		/* on which device is the block? */
-register block_nr block;	/* which block is wanted? */
-int only_search;		/* if NO_READ, don't read, else act normal */
+PUBLIC struct buf *get_block(register dev_nr dev, register block_nr block, int only_search)
 {
 /* Check to see if the requested block is in the block cache.  If so, return
  * a pointer to it.  If not, evict some other block and fetch it (unless
@@ -105,9 +109,7 @@ int only_search;		/* if NO_READ, don't read, else act normal */
 /*===========================================================================*
  *				put_block				     *
  *===========================================================================*/
-PUBLIC put_block(bp, block_type)
-register struct buf *bp;	/* pointer to the buffer to be released */
-int block_type;			/* INODE_BLOCK, DIRECTORY_BLOCK, or whatever */
+PUBLIC void put_block(register struct buf *bp, int block_type)
 {
 /* Return a block to the list of available blocks.   Depending on 'block_type'
  * it may be put on the front or rear of the LRU chain.  Blocks that are
@@ -183,17 +185,13 @@ int block_type;			/* INODE_BLOCK, DIRECTORY_BLOCK, or whatever */
 /*===========================================================================*
  *				alloc_zone				     *
  *===========================================================================*/
-PUBLIC zone_nr alloc_zone(dev, z)
-dev_nr dev;			/* device where zone wanted */
-zone_nr z;			/* try to allocate new zone near this one */
+PUBLIC zone_nr alloc_zone(dev_nr dev, zone_nr z)
 {
 /* Allocate a new zone on the indicated device and return its number. */
 
   bit_nr b, bit;
   struct super_block *sp;
   int major, minor;
-  extern bit_nr alloc_bit();
-  extern struct super_block *get_super();
 
   /* Note that the routine alloc_bit() returns 1 for the lowest possible
    * zone, which corresponds to sp->s_firstdatazone.  To convert a value
@@ -223,14 +221,11 @@ zone_nr z;			/* try to allocate new zone near this one */
 /*===========================================================================*
  *				free_zone				     *
  *===========================================================================*/
-PUBLIC free_zone(dev, numb)
-dev_nr dev;				/* device where zone located */
-zone_nr numb;				/* zone to be returned */
+PUBLIC void free_zone(dev_nr dev, zone_nr numb)
 {
 /* Return a zone. */
 
   register struct super_block *sp;
-  extern struct super_block *get_super();
 
   if (numb == NO_ZONE) return;	/* checking here easier than in caller */
 
@@ -243,9 +238,7 @@ zone_nr numb;				/* zone to be returned */
 /*===========================================================================*
  *				rw_block				     *
  *===========================================================================*/
-PUBLIC rw_block(bp, rw_flag)
-register struct buf *bp;	/* buffer pointer */
-int rw_flag;			/* READING or WRITING */
+PUBLIC void rw_block(register struct buf *bp, int rw_flag)
 {
 /* Read or write a disk block. This is the only routine in which actual disk
  * I/O is invoked.  If an error occurs, a message is printed here, but the error
@@ -280,8 +273,7 @@ int rw_flag;			/* READING or WRITING */
 /*===========================================================================*
  *				invalidate				     *
  *===========================================================================*/
-PUBLIC invalidate(device)
-dev_nr device;			/* device whose blocks are to be purged */
+PUBLIC void invalidate(dev_nr device)
 {
 /* Remove all the blocks belonging to some device from the cache. */
 

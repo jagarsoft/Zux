@@ -38,7 +38,7 @@ union ptr_union {
 
 static int      ic;		/* the current character */
 static char    *rnc_arg;	/* the string or the filepointer */
-static          rnc_code;	/* 1 = read from string, else from FILE */
+static int      rnc_code;	/* 1 = read from string, else from FILE */
 
 
 
@@ -60,7 +60,7 @@ static rnc ()
  * unget the current character 
  */
 
-static ugc ()
+static void ugc ()
 {
 
 	if (rnc_code)
