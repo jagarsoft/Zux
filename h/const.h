@@ -22,7 +22,7 @@
 #define MAJOR	           8	/* major device = (dev>>MAJOR) & 0377 */
 #define MINOR	           0	/* minor device = (dev>>MINOR) & 0377 */
 
-#define NR_TASKS           8	/* number of tasks in the transfer vector */
+#define NR_TASKS           4	/* number of tasks in the transfer vector */
 #define NR_PROCS          16	/* number of slots in proc table */
 #define NR_SEGS            3	/* # segments per process */
 #define T                  0	/* proc[i].mem_map[T] is for text */

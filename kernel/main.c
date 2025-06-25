@@ -32,10 +32,44 @@
 
 #ifdef Z80
 #define BASE               0	/* address where MINIX starts in memory */
+
+void __FASTCALL__ dump_int(int i); // struct proc *rp
+void __FASTCALL__ dump_str(char *s);
+#define LOGGER_CMD    0x00E0
+#define LOGGER_DAT    0x00E1
+#define LOG_INT        0;
+#define LOG_STR        1;
 #endif
 
 #define SIZES              8	/* sizes array has 8 entries */
 
+
+
+void __FASTCALL__ dump_int(int i) {
+  __asm
+		ld	a, LOG_INT
+		out	(LOGGER_CMD), a
+      	ld	a, l
+		out	(LOGGER_DAT), a
+		ld	a, h
+		out	(LOGGER_DAT), a
+   __endasm;
+}
+
+void __FASTCALL__ dump_str(char *s) {
+  __asm
+		ld	a, LOG_STR
+		out	(LOGGER_CMD), a
+.dump_str_L1:
+      	ld	a, (hl)
+        or  a
+		jr	z, dump_str_L0
+		out	(LOGGER_DAT), a
+		inc hl
+        jr	dump_str_L1
+.dump_str_L0:
+   __endasm;
+}
 /*===========================================================================*
  *                                   main                                    * 
  *===========================================================================*/
@@ -64,12 +98,15 @@ PUBLIC main()
 
   lock();			/* we can't handle interrupts yet */
 	putsk("Kernel\n");
+    dump_str("Kernel\n");
   base_click = BASE >> CLICK_SHIFT;
   size = sizes[0] + sizes[1];	/* kernel text + data size in clicks */
   mm_base = base_click + size;	/* place where MM starts (in clicks) */
+dump_int(size);
+dump_int(mm_base);
 
   for (rp = &proc[0]; rp <= &proc[NR_TASKS+LOW_USER]; rp++) {
-	for (t=0; t<NR_REGS; t++) rp->p_reg[t] = 0100*t;	/* debugging */
+	for (t=0; t<NR_REGS; t++) rp->p_reg[t] = 0100*(t+1);	/* debugging */
 	t = rp - proc - NR_TASKS;	/* task number */
 	rp->p_sp = (rp < &proc[NR_TASKS] ? t_stack[NR_TASKS+t+1].stk : INIT_SP);
 	rp->p_splimit = rp->p_sp;
@@ -84,6 +121,9 @@ PUBLIC main()
 
 	/* Set up memory map for tasks and MM, FS, INIT. */
 	if (t < 0) {
+		dump_str("t#\n");
+		dump_int(-t);
+		dump_int(rp);
 		/* I/O tasks. */
 		rp->p_map[T].mem_len  = VERY_BIG; 
 		rp->p_map[T].mem_phys = base_click;
@@ -93,10 +133,17 @@ PUBLIC main()
 		rp->p_map[S].mem_phys = base_click + sizes[0] + sizes[1];
 		rp->p_map[S].mem_vir = sizes[0] + sizes[1];
 	} else {
+		dump_str("MM,FS,INIT\n");
+		dump_int(t);
+		dump_int(rp);
 		/* MM, FS, and INIT. */
 		previous_base = proc[NR_TASKS + t - 1].p_map[S].mem_phys;
+                dump_str("sizes[2*t + 2]\n");
+                dump_int(sizes[2*t + 2]);
 		rp->p_map[T].mem_len  = sizes[2*t + 2];
 		rp->p_map[T].mem_phys = (t == 0 ? mm_base : previous_base);
+				dump_str("sizes[2*t + 3]\n");
+                dump_int(sizes[2*t + 3]);
 		rp->p_map[D].mem_len  = sizes[2*t + 3];
 		rp->p_map[D].mem_phys = rp->p_map[T].mem_phys + sizes[2*t + 2];
 		rp->p_map[S].mem_vir  = sizes[2*t + 3];

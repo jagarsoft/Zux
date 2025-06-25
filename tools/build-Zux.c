@@ -62,13 +62,14 @@ void main(int argc, char *argv[])
     /* Copy the 5 programs to the output file or diskette. */
     for (i = 0; i < PROGRAMS; i++)
         copy2(i, argv[i+1]);
+    fclose(image);
 
-    printf("                                                -----           -----\n");
-    printf("Operating system image size   %29ld     %5lx\n", cum_size, cum_size);
+    printf("                                                ----------      ----------\n");
+    printf("Operating system image size   %28ld\t%5lX\n", cum_size, cum_size);
 
     open_image(argv[PROGRAMS+1]);
-
     patch();
+
     exit(0);
 }
 
@@ -140,8 +141,9 @@ void copy2(int num, char *file_name)
     left_to_read = st.st_size;
     while (left_to_read > 0) {
         count = (left_to_read < READ_UNIT ? left_to_read : READ_UNIT);
-        bytes_read = fread(inbuf, 1, READ_UNIT, fd);
-        if (bytes_read < 1) pexit("read error on file ", file_name);
+        bytes_read = fread(inbuf, count, 1,  fd);
+        if (bytes_read < 1)
+            pexit("read error on file ", file_name);
         if (bytes_read > 0)
             fwrite(inbuf, bytes_read, 1, image);
         left_to_read -= count;
@@ -150,6 +152,7 @@ void copy2(int num, char *file_name)
     putchar('\n');
 
     fclose(fd);
+    fflush(image);
 }
 
 void patch(void)
@@ -170,6 +173,8 @@ unsigned short get_byte()
     int status;
     size_t count;
     unsigned short inbuf[READ_UNIT];
+
+        memset(&inbuf, 0, sizeof(inbuf));
 
         if ( (status = fseek(image, 0x40L, SEEK_SET)) != 0 )
             pexit("seeking error on image file\n", "");

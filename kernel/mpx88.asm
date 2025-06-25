@@ -5,9 +5,11 @@
             defc IDLE           = -999
             defc NR_REGS        = 6
 
-            defc HL_REG         = 6
-            defc DE_REG         = 4
             defc BC_REG         = 2
+            defc DE_REG         = 4
+            defc HL_REG         = 6
+            defc SP_REG         = 2 * (NR_REGS+1) ; next offset behind of p_reg[NR_REGS]
+            defc PC_REG         = 2 * (NR_REGS+2) ; p_pcpsw.pc
 
             ; include the following	from ../h/com.h
             ;DISKINT		EQU  1
@@ -90,7 +92,7 @@ _clock_int:	; Interrupt routine for	the clock.
 
 	        ld      hl, _int_mess+2   ; prepare to call interrupt(CLOCK,&intmess)
             ld      (hl), CLOCK_TICK; build	message	for clock task
-            dec     hl
+            dec     hl              ; compensates previous +2
             dec     hl
             push    hl				; push second parameter
 
@@ -108,15 +110,26 @@ _clock_int:	; Interrupt routine for	the clock.
             ld      (hl_save), hl
             pop     hl
             ld      (rst_save), hl
-            ld      (_proc_ptr + (NR_REGS+1)*2), sp ; save sp after &proc.p_reg[NR_REGS]
+            ld      (de_save), de
+
             ; start	save set up
-            ; now use sp to	point into proc	table/task save
-            push    de
+
+            ; proc_ptr->p_sp = sp
             ld      hl, (_proc_ptr)
-            ld      de, NR_REGS*2
+            ld      de, SP_REG
             add     hl, de
-            pop     de
-            ld      sp, hl  ; sp = &proc.p_reg[NR_REGS]
+            ex      de, hl
+            ld      hl, 0
+            add     hl, sp
+            ex      de, hl
+            ld      (hl), e
+            inc     hl
+            ld      (hl), d
+            dec     hl
+
+            ; now use sp to	point into proc	table/task save
+            ld      sp, hl  ; sp = &(proc_ptr->p_reg[NR_REGS+1])
+            ld      de, (de_save)
             ld      hl, (hl_save)
 
             push    iy      ; start	saving all the registers
@@ -130,7 +143,7 @@ _clock_int:	; Interrupt routine for	the clock.
             ld      hl, _k_stack
             add     hl, de
             ; TODO check splimit
-            ld      sp, hl
+            ld      sp, hl  ; sp = &k_stack[K_STACK_BYTES]
 
             ld      hl, (ret_save)
             jp      (hl)
@@ -152,6 +165,24 @@ _restart:   ; This routine sets up and runs	a proc or task.
             jr      z, _idle
 
 .restart_not_IDLE:
+            ld      hl,(_proc_ptr)
+            ld      de, PC_REG
+            add     hl, de
+
+            ld      e, (hl)
+            inc     hl
+            ld      d, (hl)
+            ld      (rst_save), de  ; proc_ptr->pc_pcpsw.pc
+
+            ld      hl,(_proc_ptr)
+            ld      de, SP_REG      ; p_sp
+            add     hl, de
+
+            ld      e, (hl)
+            inc     hl
+            ld      d, (hl)
+            ld      (hl_save), de   ; save proc's sp: proc_ptr->p_sp
+
             ld      sp, (_proc_ptr)
 
             pop     af      ; start	restoring registers
@@ -160,16 +191,14 @@ _restart:   ; This routine sets up and runs	a proc or task.
             pop     hl
             pop     ix
             pop     iy
-
-            ld      (hl_save), hl
-            ld      sp, (_proc_ptr + (NR_REGS+1)*2) ; restore sp to clean stack
-            ld      hl, (hl_save)
+            ; TODO check splimit
+            ld      sp, (hl_save)  ; task's or proc's stack
             push    hl
             ld      hl, (rst_save)
 
             ex      (sp), hl        ; hl <-> rst_save
 
-            ei
+            ei      ; standard return of interrupt
             ret
 
 ;===========================================================================
@@ -182,4 +211,5 @@ _idle:				    ; executed when	there is no work
 
 .ret_save:  defs    2
 .hl_save:   defs    2
+.de_save:   defs    2
 .rst_save:  defs    2

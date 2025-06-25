@@ -130,11 +130,18 @@ void __FASTCALL__ putck(unsigned char c)
   __asm
       	ld	a, l
 		rst	0x10
-		cmp 0x0d
+IF STANDARDESCAPECHARS
+		cp 0x0a
+		jr	nz, putsk_L0
+		ld	a, 0x0d
+ELSE
+      	cp 0x0d
 		jr	nz, putsk_L0
 		ld	a, 0x0a
-		rst	0x10
+ENDIF
+        rst	0x10
 .putsk_L0:
    __endasm;
 }
+
 #endif

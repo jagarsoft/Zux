@@ -42,9 +42,13 @@ _cp_mess:
 ;===========================================================================
 ;				port_out
 ;===========================================================================
-; port_out(port, value)	writes 'value' on the I/O port 'port'.
-
+; port_out(int port, int value)	writes 'value' on the I/O port 'port'.
+; https://github.com/z88dk/z88dk/wiki/The-Stack-Frame
 _port_out:
+
+            ld  b,  h
+            ld  c,  l
+            out (c), a
             ret			; return to caller
 
 
@@ -110,8 +114,9 @@ _build_sig:
 
 _get_chrome:
     ; color	= 1
-	ret			; color	return
+	; ret			; color	return
     ; mono = 0
+    ld  hl, 0
 	ret			; monochrome return
 
 

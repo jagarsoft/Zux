@@ -96,3 +96,7 @@
 #define MEM_PTR        m1_p1	/* tells where memory map is for sys_newmap */
 #define CANCEL             0    /* general request to force a task to cancel */
 #define SIG_MAP        m1_i2	/* used by kernel for passing signal bit map */
+
+void receive(int src, int *mess);
+void send(int dest, int *mess);
+void sendrec(int srcdest, int *mess);

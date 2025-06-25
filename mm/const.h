@@ -13,13 +13,13 @@
 
 #ifdef i8088
 #define PAGE_SIZE	  16	/* how many bytes in a page */
-#define MAX_PAGES       4096	/* how many pages in the virtual addr space */
+#define MAX_PAGES	 4096	/* how many pages in the virtual addr space */
 #define HDR_SIZE	  32	/* # bytes in the exec file header */
 #endif
 
 #ifdef Z80
 #define PAGE_SIZE	  16	/* how many bytes in a page */
-#define MAX_PAGES       4096	/* how many pages in the virtual addr space */
+#define MAX_PAGES	 4096	/* how many pages in the virtual addr space */
 #define HDR_SIZE	  32	/* # bytes in the exec file header */
 #endif
 

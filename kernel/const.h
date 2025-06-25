@@ -38,12 +38,14 @@
 
 
 #ifdef Z80
+#define SYS_VECTOR      0x20	/* system calls are made with RST 20h */
+
 /* p_reg contains: af, bc, de, hl, ix, iy in that order. */
 #define NR_REGS			6		/* number of general regs in each proc slot */
 
-#define HL_REGS			6		/* offset into proc[i].p_reg[hl] */
-#define DE_REGS			4		/* offset into proc[i].p_reg[de] */
 #define BC_REGS			2		/* offset into proc[i].p_reg[bc] */
+#define DE_REGS			4		/* offset into proc[i].p_reg[de] */
+#define HL_REGS			6		/* offset into proc[i].p_reg[hl] */
 
 #define MEM_BYTES    655360L	/* memory size for /dev/mem */
 

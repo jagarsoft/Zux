@@ -1,7 +1,7 @@
 <h1 align="center">Zux: Minix for Z80</h1>
 
 <p align="center">
-	<img src="Logo/Zux Logo 150.png" alt="StateMachine Logo" width="150" height="150">
+	<img src="Logo/Zux Logo 150.png" alt="Zux Logo" width="150" height="150">
 </p>
 
 Andy Tanenbaum first released MINIX 1 in 1987 as an appendix to the book, Operating Systems: Design and Implementation.

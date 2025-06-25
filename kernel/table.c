@@ -47,5 +47,5 @@ int (*task[NR_TASKS+INIT_PROC_NR+1])() = {
     mem_task,
     clock_task,
     sys_task
-    , 0, 0, 0, 0
+    , 0, 0, 0	//, 0
 };

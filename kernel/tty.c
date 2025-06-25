@@ -197,7 +197,7 @@ PRIVATE char m24[] = {
 
 EXTERN void lock(void);
 EXTERN void unlock(void);
-EXTERN void receive(int caller, struct message *m_ptr);
+//EXTERN void receive(int caller, struct message *m_ptr);
 
 PRIVATE int chuck(struct tty_struct *tp);
 PRIVATE int rd_chars(struct tty_struct *tp);
