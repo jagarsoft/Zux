@@ -40,12 +40,20 @@ extern int sys_task(), clock_task(), mem_task(), floppy_task(),
  * the tasks in ../h/com.h.
  */
 int (*task[NR_TASKS+INIT_PROC_NR+1])() = {
-    // printer_task,
-    tty_task,
-    // winchester_task,
-    // floppy_task,
-    mem_task,
-    clock_task,
-    sys_task
-    , 0, 0, 0	//, 0
+#ifdef i8088
+    printer_task,		// -8
+#endif
+
+    tty_task,			// -7	-5
+
+#ifdef i8088
+    winchester_task,	// -6
+    floppy_task,		// -5
+#endif
+
+    mem_task,			// -4	-4
+    clock_task,			// -3	-3
+    sys_task			// -2	-2
+    , 0		 // HARDWARE   -1	-1
+    , 0, 0	 //, 0
 };

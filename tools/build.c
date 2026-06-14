@@ -48,7 +48,7 @@
 #define SECTOR_SIZE 512         /* size of buf */
 #define READ_UNIT 512           /* how big a chunk to read in */
 #define KERNEL_D_MAGIC 0x526F   /* identifies kernel data space */
-#define FS_D_MAGIC 0xDADA	/* identifies fs data space */
+#define FS_D_MAGIC 0xDADA	    /* identifies fs data space */
 #define CLICK_SHIFT 4
 #define KERN 0
 #define MM   1
@@ -224,7 +224,7 @@ int fd, *sepid;
 unsigned *text_bytes, *data_bytes, *bss_bytes;
 char *file_name;
 {
-/* Read the header and check the magic number.  The standard Monix header 
+/* Read the header and check the magic number.  The standard Minix header 
  * consists of 8 longs, as follows:
  *      0: 0x04100301L (combined I & D space) or 0x04200301L (separate I & D)
  *      1: 0x00000020L (stripped file) or 0x00000030L (unstripped file)

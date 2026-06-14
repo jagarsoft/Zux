@@ -34,6 +34,8 @@
 #define INT2_CTL        0xA0	/* I/O port for second interrupt controller */
 #define INT2_MASK       0xA1	/* setting bits in this port disables ints */
 #define ENABLE          0x20	/* code used to re-enable after an interrupt */
+
+#define RET_REG            0	/* system call return codes go in this reg */
 #endif
 
 
@@ -47,15 +49,16 @@
 #define DE_REGS			4		/* offset into proc[i].p_reg[de] */
 #define HL_REGS			6		/* offset into proc[i].p_reg[hl] */
 
-#define MEM_BYTES    655360L	/* memory size for /dev/mem */
+#define MEM_BYTES    0x100000000L	/* memory size for /dev/mem */
 
 #define INIT_SP (int*)0x0       /* initial sp: 3 words pushed by kernel ??? */
+
+#define RET_REG			HL_REGS	/* system call return codes go in this reg where Z88DK expects it */
 #endif
 
 #define TASK_STACK_BYTES 256	/* how many bytes for each task stack */
 #define K_STACK_BYTES    256	/* how many bytes for the kernel stack */
 
-#define RET_REG            0	/* system call return codes go in this reg */
 #define IDLE            -999	/* 'cur_proc' = IDLE means nobody is running */
 
 /* The following items pertain to the 3 scheduling queues. */

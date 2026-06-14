@@ -14,14 +14,14 @@
 #include <sys/stat.h>
 
 #define PROGRAMS 4              /* kernel + mm + fs + init = 4 */
-#define SECTOR_SIZE 512         /* size of buf */
+//#define SECTOR_SIZE 512         /* size of buf */
 #define READ_UNIT 512           /* how big a chunk to read in */
 #define KERNEL_D_MAGIC 0x526F   /* identifies kernel data space */
 
 FILE *image;                    /* file descriptor used for output file */
 
 struct sizes {
-    long text_size;           /* size in bytes */
+    long text_size;             /* size in bytes */
 //    unsigned data_size;           /* size in bytes */
 //    unsigned bss_size;            /* size in bytes */
 //    int sep_id;                   /* 1 if separate, 0 if not */
@@ -35,7 +35,7 @@ char *name[] = {"kernel\t", "mm\t", "fs\t", "init\t"};
 void create_image(char *f);
 void open_image(char *f);
 void copy2(int num, char *file_name);
-void patch(void);
+void patch2(void);
 void read_block(int blk, char *buff);
 void write_block(int blk, char *buff);
 unsigned short get_byte();
@@ -68,7 +68,7 @@ void main(int argc, char *argv[])
     printf("Operating system image size   %28ld\t%5lX\n", cum_size, cum_size);
 
     open_image(argv[PROGRAMS+1]);
-    patch();
+    patch2();
 
     exit(0);
 }
@@ -115,7 +115,7 @@ void copy2(int num, char *file_name)
     struct stat st;
     size_t bytes_read, count;
     size_t left_to_read, tot_bytes;
-    char inbuf[READ_UNIT];
+    unsigned char inbuf[READ_UNIT];
 
         //debug("Opening file %s\n", file_name);
         printf("Opening file %s\n", file_name);
@@ -134,7 +134,7 @@ void copy2(int num, char *file_name)
         cum_size = (long)tot_bytes;
 
         /* Record the size information in the table. */
-        if ( num > 0) // skip kernel
+        //if ( num > 0) // skip kernel
             sizes[num].text_size = cum_size;
 
     /* Read in the text, and copy them to output. */
@@ -145,7 +145,7 @@ void copy2(int num, char *file_name)
         if (bytes_read < 1)
             pexit("read error on file ", file_name);
         if (bytes_read > 0)
-            fwrite(inbuf, bytes_read, 1, image);
+            fwrite(inbuf, count, 1, image);
         left_to_read -= count;
         putchar('.');
     }
@@ -155,7 +155,7 @@ void copy2(int num, char *file_name)
     fflush(image);
 }
 
-void patch(void)
+void patch2(void)
 {
     unsigned short i ;
 
@@ -163,16 +163,17 @@ void patch(void)
         if ( i != KERNEL_D_MAGIC )
             pexit("kernel data space: no magic number","");
 
-        put_byte(0x40L, sizes[1].text_size);
-        put_byte(0x44L, sizes[2].text_size);
-        put_byte(0x48L, sizes[3].text_size);
+        put_byte(0x40L, sizes[0].text_size); // kernel
+        put_byte(0x44L, sizes[1].text_size); // mm
+        put_byte(0x48L, sizes[2].text_size); // fs
+        put_byte(0x4CL, sizes[3].text_size); // init
 }
 
 unsigned short get_byte()
 {
     int status;
     size_t count;
-    unsigned short inbuf[READ_UNIT];
+    unsigned char inbuf[READ_UNIT];
 
         memset(&inbuf, 0, sizeof(inbuf));
 
@@ -181,7 +182,7 @@ unsigned short get_byte()
         if ( (count = fread(inbuf, sizeof(unsigned short), 1, image)) != 1)
             pexit("read error on seeked image file\n", "");
 
-        return inbuf[0];
+        return inbuf[0] + (inbuf[1] << 8);
 }
 
 void put_byte(long offset, long data)

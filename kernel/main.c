@@ -32,7 +32,6 @@
 
 #ifdef Z80
 #define BASE               0	/* address where MINIX starts in memory */
-
 void __FASTCALL__ dump_int(int i); // struct proc *rp
 void __FASTCALL__ dump_str(char *s);
 #define LOGGER_CMD    0x00E0
@@ -87,7 +86,7 @@ PUBLIC main()
   extern int s_call(), disk_int(), tty_int(), clock_int(), disk_int();
   extern int wini_int(), lpr_int(), surprise(), trp(), divide();
   extern phys_bytes umap();
-  extern void lock();
+  extern void lock(), ready();;
 
   /* Set up proc table entry for user processes.  Be very careful about
    * sp, since the 3 words prior to it will be clobbered when the kernel pushes
@@ -97,13 +96,15 @@ PUBLIC main()
    */
 
   lock();			/* we can't handle interrupts yet */
-	putsk("Kernel\n");
-    dump_str("Kernel\n");
+putsk("Kernel: configuring process tables\n");
+//dump_str("Kernel\n");
   base_click = BASE >> CLICK_SHIFT;
   size = sizes[0] + sizes[1];	/* kernel text + data size in clicks */
   mm_base = base_click + size;	/* place where MM starts (in clicks) */
-dump_int(size);
-dump_int(mm_base);
+  printf("Kernel: size %d (%x) bytes\n",size, size);
+  printf("Kernel: mm_base %d (%x)\n", mm_base, mm_base);
+//dump_int(size);
+//dump_int(mm_base);
 
   for (rp = &proc[0]; rp <= &proc[NR_TASKS+LOW_USER]; rp++) {
 	for (t=0; t<NR_REGS; t++) rp->p_reg[t] = 0100*(t+1);	/* debugging */
@@ -113,7 +114,10 @@ dump_int(mm_base);
 	if (rp->p_splimit != INIT_SP)
 		rp->p_splimit -= (TASK_STACK_BYTES - SAFETY)/sizeof(int);
 	rp->p_pcpsw.pc = task[t + NR_TASKS];
-	if (rp->p_pcpsw.pc != 0 || t >= 0) ready(rp);
+//dump_str("rp->p_pcpsw.pc");
+//dump_int(rp->p_pcpsw.pc);
+	//if (rp->p_pcpsw.pc != 0 || t >= 0) was always true
+          ready(rp);
 #ifdef i8088
 	rp->p_pcpsw.psw = INIT_PSW;
 #endif
@@ -121,33 +125,61 @@ dump_int(mm_base);
 
 	/* Set up memory map for tasks and MM, FS, INIT. */
 	if (t < 0) {
-		dump_str("t#\n");
-		dump_int(-t);
-		dump_int(rp);
+//dump_str("t#\n");
+//dump_int(-t);
+//dump_int(rp);
+
 		/* I/O tasks. */
+//TODO para el Kernel y MM los mem_phys son siempre 0. No se le suma nada
 		rp->p_map[T].mem_len  = VERY_BIG; 
 		rp->p_map[T].mem_phys = base_click;
 		rp->p_map[D].mem_len  = VERY_BIG; 
-		rp->p_map[D].mem_phys = base_click + sizes[0];
+		rp->p_map[D].mem_phys = base_click; // + sizes[0];
 		rp->p_map[S].mem_len  = VERY_BIG; 
-		rp->p_map[S].mem_phys = base_click + sizes[0] + sizes[1];
+		rp->p_map[S].mem_phys = base_click; // + sizes[0] + sizes[1];
 		rp->p_map[S].mem_vir = sizes[0] + sizes[1];
+
+		printf("Kernel: task %d at %d (%x)\n", t, rp->p_pcpsw.pc, rp->p_pcpsw.pc);
+        printf("Kernel: task %d Text mem_len %d (%x) bytes\n", t, rp->p_map[T].mem_len, rp->p_map[T].mem_len);
+        printf("Kernel: task %d Text mem_phys at %d (%x)\n", t, rp->p_map[T].mem_phys, rp->p_map[T].mem_phys);
+        printf("Kernel: task %d Data mem_len %d (%x) bytes\n", t, rp->p_map[D].mem_len, rp->p_map[D].mem_len);
+        printf("Kernel: task %d Data mem_phys at %d (%x)\n", t, rp->p_map[D].mem_phys, rp->p_map[D].mem_phys);
+        printf("Kernel: task %d Stack mem_len %d (%x) bytes\n", t, rp->p_map[S].mem_len, rp->p_map[S].mem_len);
+        printf("Kernel: task %d Stack mem_phys at %d (%x)\n", t, rp->p_map[S].mem_phys, rp->p_map[S].mem_phys);
+        printf("Kernel: task %d Stack mem_vir %d (%x) bytes\n", t, rp->p_map[S].mem_vir, rp->p_map[S].mem_vir);
 	} else {
-		dump_str("MM,FS,INIT\n");
-		dump_int(t);
-		dump_int(rp);
+//dump_str("MM,FS,INIT\n");
+//dump_int(t);
+//dump_int(rp);
 		/* MM, FS, and INIT. */
-		previous_base = proc[NR_TASKS + t - 1].p_map[S].mem_phys;
-                dump_str("sizes[2*t + 2]\n");
-                dump_int(sizes[2*t + 2]);
+		// t==1 => FS & INIT, take BANK 1
+//TODO para FS e INIT los mem_phys son siempre 1. No se le suma nada
+		previous_base = (t == 1 ? 1 : proc[NR_TASKS + t - 1].p_map[S].mem_phys;
+//TODO: convertirlo en una formula para saber el banco en funcion de los sizes
+//Bank 0: Kernel
+//Bank 1: MM
+//Bank 2: FS & INIT
+//dump_str("sizes[2*t + 2]\n");
+//dump_int(sizes[2*t + 2]);
 		rp->p_map[T].mem_len  = sizes[2*t + 2];
 		rp->p_map[T].mem_phys = (t == 0 ? mm_base : previous_base);
-				dump_str("sizes[2*t + 3]\n");
-                dump_int(sizes[2*t + 3]);
+//dump_str("mm_base/previous_base\n");
+//dump_int(rp->p_map[T].mem_phys);
+//dump_str("sizes[2*t + 3]\n");
+//dump_int(sizes[2*t + 3]);
 		rp->p_map[D].mem_len  = sizes[2*t + 3];
 		rp->p_map[D].mem_phys = rp->p_map[T].mem_phys + sizes[2*t + 2];
 		rp->p_map[S].mem_vir  = sizes[2*t + 3];
 		rp->p_map[S].mem_phys = rp->p_map[D].mem_phys + sizes[2*t + 3];
+
+		printf("Kernel: proc %d at %d (%x)\n", t, rp->p_pcpsw.pc, rp->p_pcpsw.pc);
+        printf("Kernel: proc %d Text mem_len %d (%x) bytes\n", t, rp->p_map[T].mem_len, rp->p_map[T].mem_len);
+        printf("Kernel: proc %d Text mem_phys at %d (%x)\n", t, rp->p_map[T].mem_phys, rp->p_map[T].mem_phys);
+        printf("Kernel: proc %d Data mem_len %d (%x) bytes\n", t, rp->p_map[D].mem_len, rp->p_map[D].mem_len);
+        printf("Kernel: proc %d Data mem_phys at %d (%x)\n", t, rp->p_map[D].mem_phys, rp->p_map[D].mem_phys);
+        printf("Kernel: proc %d Stack mem_len %d (%x) bytes\n", t, rp->p_map[S].mem_len, rp->p_map[S].mem_len);
+        printf("Kernel: proc %d Stack mem_phys at %d (%x)\n", t, rp->p_map[S].mem_phys, rp->p_map[S].mem_phys);
+        printf("Kernel: proc %d Stack mem_vir %d (%x) bytes\n", t, rp->p_map[S].mem_vir, rp->p_map[S].mem_vir);
 	}
 
 #ifdef i8088

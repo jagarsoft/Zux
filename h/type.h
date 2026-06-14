@@ -88,7 +88,6 @@ typedef struct {
 #define m3_p1  m_u.m_m3.m3p1
 #define m3_ca1 m_u.m_m3.m3ca1
 
-
 #define m4_l1  m_u.m_m4.m4l1
 #define m4_l2  m_u.m_m4.m4l2
 #define m4_l3  m_u.m_m4.m4l3

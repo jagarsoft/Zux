@@ -8,8 +8,8 @@
             defc BC_REG         = 2
             defc DE_REG         = 4
             defc HL_REG         = 6
-            defc SP_REG         = 2 * (NR_REGS+1) ; next offset behind of p_reg[NR_REGS]
-            defc PC_REG         = 2 * (NR_REGS+2) ; p_pcpsw.pc
+            defc SP_REG         = 12; 2 * (NR_REGS+0) = 12 ; next offset behind of p_reg[NR_REGS]
+            defc PC_REG         = 14; 2 * (NR_REGS+1) = 14 ; p_pcpsw.pc
 
             ; include the following	from ../h/com.h
             ;DISKINT		EQU  1
@@ -128,7 +128,7 @@ _clock_int:	; Interrupt routine for	the clock.
             dec     hl
 
             ; now use sp to	point into proc	table/task save
-            ld      sp, hl  ; sp = &(proc_ptr->p_reg[NR_REGS+1])
+            ld      sp, hl  ; sp = &(proc_ptr->p_reg[NR_REGS])
             ld      de, (de_save)
             ld      hl, (hl_save)
 
@@ -199,7 +199,14 @@ _restart:   ; This routine sets up and runs	a proc or task.
             ex      (sp), hl        ; hl <-> rst_save
 
             ei      ; standard return of interrupt
-            ret
+            ret     ; TODO este RET debe ser con retorno de CS (IRET)
+            ; sustituirlo por RETI y capturarlo en el hipervisor
+            ; para que cambie el banco actual:
+            ; Enviar un OUT(CHANGE_BANK_CMD) al de mem_phys del destino
+            ; y terminar con RETI. Gracias a la ayuda del hipervisor el ret
+            ; se hará al PC del nuevo banco.
+
+            ;NOTA cuando ocurra una INT siempre se debe cambiar al BANK 0 !!
 
 ;===========================================================================
 ;				idle

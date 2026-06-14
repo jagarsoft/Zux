@@ -54,8 +54,16 @@ PUBLIC mem_task()
 putsk("mem_task\n");
   /* Initialize this task. */
   ram_origin[KMEM_DEV] = (phys_bytes) get_base() << CLICK_SHIFT;
+dump_str("ram_origin[KMEM_DEV]\n");
+dump_int(ram_origin[KMEM_DEV]);
+
   ram_limit[KMEM_DEV] = (sizes[0] + sizes[1]) << CLICK_SHIFT;
+dump_str("ram_limit[KMEM_DEV]\n");
+dump_int(ram_limit[KMEM_DEV]);
+
   ram_limit[MEM_DEV] = MEM_BYTES;
+dump_str("ram_limit[MEM_DEV]\n");
+dump_int(ram_limit[MEM_DEV]);
 
   /* Here is the main loop of the memory task.  It waits for a message, carries
    * it out, and sends a reply.

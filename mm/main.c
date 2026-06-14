@@ -124,6 +124,7 @@ PRIVATE mm_init()
   procs_in_use = 3;
 
   /* Set stack limit, which is checked on every procedure call. */
+  sp_limit = mm_statck - 32;
 }
 
 

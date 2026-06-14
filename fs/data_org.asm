@@ -11,36 +11,26 @@
 
     SECTION	code_compiler
 
-._get_base
-        ld      hl, 0
-        ret
-
-._get_size
-        ld      hl, 0
-        ret
-
-._get_tot_mem
-        ld      hl, 16 ; TODO enviar con OUT(GET_TOT_MEM_CMD)
-        ; esperarla con IN(GET_TOT_MEM_DAT) dos byte (LOW & HIGHT) y devolverlo en HL
-        ret
-
     SECTION	bss_compiler
-	SECTION	code_compiler
+    SECTION	code_compiler
 ; --- Start of Optimiser additions ---
 
 
 ; --- Start of Static Variables ---
 
-	SECTION	bss_compiler
-	SECTION	code_compiler
+    SECTION	bss_compiler
+._data_org  defw 0xDADA		; 0xDADA is magic number for build
+            defs 7*2		; first 8 words of MM, FS, INIT are for stack
+._brksize   defw 0 ;	offset dgroup:@END  ; first free memory
+._sp_limit  defw 0
 
+    SECTION	code_compiler
 
 ; --- Start of Scope Defns ---
 
-	GLOBAL	_get_base
-	GLOBAL	_get_size
-	GLOBAL	_get_tot_mem
-
+    GLOBAL	_data_org
+    GLOBAL	_brksize
+    GLOBAL	_sp_limit
 
 ; --- End of Scope Defns ---
 

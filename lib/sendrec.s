@@ -27,4 +27,3 @@ _sendrec:
 	int SYSVEC		| trap to the kernel
 	pop bp			| restore bp
 	ret			| return
-

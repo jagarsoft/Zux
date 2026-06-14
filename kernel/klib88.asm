@@ -85,6 +85,8 @@ _unlock:
 ;===========================================================================
 ; Restore enable/disable bit to	the value it had before	last lock.
 _restore:
+    ; TODO usar un contador en lock() e incrementar con cada llamada a lock()
+    ; cada llamada a restore() decrementa el contador. Al llegar a 0 unlock()
 	ret			; return to caller
 
 ;===========================================================================

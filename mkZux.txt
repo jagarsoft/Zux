@@ -1,0 +1,3 @@
+build-Zux.exe kernel\kernel.bin mm\mm.bin fs\fs.bin tools\init.bin image-Zux-1.2.bin 
+
+z88dk-dis -o 0 -x kernel\kernel.map image-Zux-1.5.bin > image-Zux-1.5.bin.asm
